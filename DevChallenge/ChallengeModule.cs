@@ -31,8 +31,16 @@ namespace DevChallenge
                     var obj = HttpGet();
                     var respo = JsonConvert.DeserializeObject<ResponseObject>(obj);
 
+                    //test
+
+//                    var encodingGet = HttpGetTest(respo.algorithm);
+//                    var respoEncoded = JsonConvert.DeserializeObject<ResponseEncoded>(encodingGet);
+//                    var decode = Avengers.Base64Decode(respoEncoded.encoded);
+
                     var encodedValue = ApplyAlgorithm(respo.words, respo.startingFibonacciNumber, respo.algorithm);
 
+                   // var myDecode = Avengers.Base64Decode(encodedValue);
+                    
                     var responseP = HttpPost(encodedValue, respo.algorithm);
                     var responsePost = JsonConvert.DeserializeObject<ResponsePost>(responseP);
                     results.Add(responseP);
@@ -69,6 +77,16 @@ namespace DevChallenge
             var request = new RestRequest("values/" + guid, Method.GET);
 
             var response =  client.Execute(request);
+            var content = response.Content;
+            return content;
+        }
+
+        public string HttpGetTest(string algorithm)
+        {
+            var client = new RestClient(apiUrl);
+            var request = new RestRequest("encoded/" + guid +"/" + algorithm, Method.GET);
+            
+            var response = client.Execute(request);
             var content = response.Content;
             return content;
         }
@@ -125,5 +143,10 @@ namespace DevChallenge
     {
         public string status { get; set; }
         public string message { get; set; }
+    }
+
+    public class ResponseEncoded
+    {
+        public string encoded { get; set; }
     }
 }

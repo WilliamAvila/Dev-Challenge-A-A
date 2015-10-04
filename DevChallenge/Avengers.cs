@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using System.Web;
 using Microsoft.SqlServer.Server;
@@ -10,12 +11,12 @@ namespace DevChallenge
 {
     public class Avengers
     {
-        private List<double> fibo;
+        private List<long> fibo;
         private char[] validVowels = {'a', 'e', 'i', 'o', 'u', 'y', 'A', 'E', 'I', 'O', 'U', 'Y'};
 
         private string[] englishWords =
         {
-            "drool", "cats", "clean", "code", "dogs", "material", "needed", "this", "is", "hard",
+            "drool", "cats", "clean", "code", "dogs", "materials", "needed", "this", "is", "hard",
             "what", "are", "you", "smoking", "shot", "gun", "down", "river", "super", "man", "rule", "acklen",
             "developers", "amazing", "home", "notch", "light", "saw"
         };
@@ -25,7 +26,7 @@ namespace DevChallenge
 
         public Avengers()
         {
-            fibo = FibonacciList(10000);
+            fibo = FibonacciList(90);
         }
 
 
@@ -68,14 +69,15 @@ namespace DevChallenge
         public string Thor(string[] input, int fib)
         {
             var result = "";
-	        // step #1
-            string[] words = AlternateConstants(input);
 
-            // step #2
+            // step #1
+            string[] words = SeparateEnglishWords(input);
+          
+	        // step #2
             Array.Sort(words);
-
-	        // step #3
-            string[] newWords = SeparateEnglishWords(words);
+           
+            // step #3
+            string[] newWords = AlternateConstants(words);
 
 	        // step #4
 	        var fiboWords = ReplacedVowelsWithFibonacci(newWords, fib);
@@ -96,7 +98,7 @@ namespace DevChallenge
 
             // step #2
             Array.Sort(words);
-
+            Array.Reverse(words);
             // step #3
             var fiboWords = ReplacedVowelsWithFibonacci(words, fib);
 
@@ -111,16 +113,16 @@ namespace DevChallenge
 
         public string[] ReplacedVowelsWithFibonacci(string[] words, int fib)
         {
-
-            var result = string.Join(",", words);
+            var result = string.Join("|", words);
             var strBldr = new StringBuilder(result);
+            var index = fibo.FindIndex(a => a == fib);
             string newWords = "";
             foreach (var letter in result)
             {
                 if (validVowels.Contains(letter))
                 {
-                    newWords += fibo[fib];
-                    fib++;
+                    newWords += fibo[index];
+                    index++;
                 }
                 else
                 {
@@ -129,41 +131,63 @@ namespace DevChallenge
             }
 
 
-            return newWords.Split(',');
+            return newWords.Split('|');
         }
+
+ 
 
         public string[] SeparateEnglishWords(string [] input)
         {
-            var singleWord = true;
             List<string> newWords = new List<string>();
 
-            if (input.Length > 1)
+            foreach (var item in input)
             {
-                foreach (var item in input)
+
+                if (ContainsMoreThanOneEnglishWord(item))
                 {
-                    foreach (var word in englishWords)
+                    var word = "";
+                    for (int i = 0; i < item.Length; i++)
                     {
-                       
-                        var index = item.ToLower().IndexOf(word);
-                        if (index != -1)
+                        word += item[i];
+                        if (englishWords.Contains(word.ToLower()))
                         {
-                            var subS = item.Substring(index, word.Length);
-                            newWords.Add(subS);
-                            singleWord = false;
+                            newWords.Add(word);
+                            word = "";
                         }
                     }
-                    if (singleWord)
-                        newWords.Add(item);
-                    singleWord = true;
+
+
+                }
+                else
+                {
+                    newWords.Add(item);
                 }
             }
+            
             return newWords.ToArray();
+        }
+
+
+        public bool ContainsMoreThanOneEnglishWord(string word)
+        {
+            int counter =0;
+            foreach (var englishWord in englishWords)
+            {
+                if (word.ToLower().Contains(englishWord)) 
+                     counter++;
+            }
+
+            if (counter > 1)
+                return true;
+            
+            return false;
         }
 
         public string [] AlternateConstants(string [] input)
         {
             string[] newWords = input;
-            var alternate =true;
+            var initialCase = char.IsUpper(input[0][0]);
+            var alternate = initialCase;
 
             for(var i =0;i<newWords.Length;i++){
             
@@ -188,14 +212,15 @@ namespace DevChallenge
             			}
             		}
             	}
+             
             }
             return newWords;
         }
 
 
-        public List<double> FibonacciList(int num)
+        public List<long> FibonacciList(int num)
         {
-            var fib = new List<double> {0, 1};
+            var fib = new List<long> {0, 1};
             for (var i = 2; i < num; i++)
                 fib.Add(fib[i - 1] + (fib[i - 2]));
 
