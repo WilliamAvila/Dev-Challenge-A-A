@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Web;
 using Nancy;
@@ -14,7 +15,7 @@ namespace DevChallenge
 
         string guid;
         private string apiUrl = "http://internal-devchallenge-2-dev.apphb.com";
-        string webhookUrl = "http://7088ea79.ngrok.io";
+        string webhookUrl = "http://67b2a7ca.ngrok.io";
         string repoUrl = "https://github.com/WilliamAvila/Dev-Challenge-A-A";
         private Avengers avenger;
         private List<string> results; 
@@ -43,17 +44,25 @@ namespace DevChallenge
                     
                     var responseP = HttpPost(encodedValue, respo.algorithm);
                     var responsePost = JsonConvert.DeserializeObject<ResponsePost>(responseP);
-                    results.Add(responseP);
+                    results.Add(responsePost.status);
 
                 }
+                if (results.Contains("Winner"))
+                    return "<h1>You Win! :) </h1>";
+                return "<h1> You Lose :( </h1>";
 
-                
-                return response;
+            };
+            Get["/secretPhrase"] = _ =>
+            {
+                string secret = File.ReadAllText(@"C:\Users\WilliamAvila\Documents\Visual Studio 2013\Projects\DevChallenge\DevChallenge\responseSecret.html");
+                return secret;
             };
 
             Post["/"] = _ =>
             {
                 var response = this.Bind<ResponsePayload>();
+                var message = "<h1>This is the secret:" + response.secret + "</h1>";
+                File.WriteAllText(@"C:\Users\WilliamAvila\Documents\Visual Studio 2013\Projects\DevChallenge\DevChallenge\responseSecret.html", message);
                 return response.secret;
             };
 
@@ -69,6 +78,7 @@ namespace DevChallenge
         }
 
 
+        
 
         public string HttpGet()
         {
